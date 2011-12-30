@@ -40,7 +40,11 @@ int main(int argc, char **argv)
     {
         
     }
-    else if(strcmp(argv[1],"update")==0)
+    else if(strcmp(argv[1],"update-all")==0)
+    {
+        
+    }
+    else if(strcmp(argv[1],"update-host")==0)
     {
         
     }
