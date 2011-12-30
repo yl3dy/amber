@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <boost/regex.hpp>
+#include "db-backend.h"
 
 void amber_host_add();
 
