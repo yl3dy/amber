@@ -1,13 +1,22 @@
-#include "init.hpp"
+#include "init.h"
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
 #include <mysql/my_global.h>
 #include <mysql/my_sys.h>
-//mysql_query("DROP DATABASE IF EXISTS Inform") or die("Could not delete db:". mysql_error());
-//mysql_query("CREATE DATABASE Inform") or die("Could not delete db:". mysql_error());
-//mysql_select_db('korvin') or die("Could not select_db :". mysql_error());
-//mysql_query("DROP TABLE IF EXISTS   KIRI;") or die("Could not delete :". mysql_error());
+#include "db-backend.h"
+
 void init()
 {
+    amber_db_init_all();
+    char buf[1024];
+    sprintf(buf,"DROP DATABASE IF EXISTS %s",amber_db_getname());
+    amber_db_query(buf);
+    sprintf(buf,"CREATE DATABASE %s",amber_db_getname());
+    amber_db_query(buf);
+    amber_db_enter();
+    sprintf(buf,"CREATE TABLE HOST_UNION (name VARCHAR (200)  NOT NULL,ip_addr VARCHAR (20)  NOT NULL,PRIMARY KEY (ip_addr))");
+    amber_db_query(buf);
+    sprintf(buf,"CREATE TABLE FULINDEX (host VARCHAR (200)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1024)  NOT NULL,size INT(11)),PRIMARY KEY (link)");
+    amber_db_query(buf);
 }

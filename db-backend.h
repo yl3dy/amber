@@ -8,9 +8,9 @@
 #include <mysql/mysql_com.h>
 
 
-void amber_init_all();    //connect to db
-void amber_enter();       //select db 
-void amber_query(char *); //for mysql_query
-void amber_db_host_add(std::string custom_hostname,std::string  ip_addr);
-
+void amber_db_init_all();    //connect to db
+void amber_db_enter();       //select db 
+void amber_db_query(char *); //for mysql_query
+void amber_db_insert_host_union(const char * hostname,const char * ip_addr);
+const char * amber_db_getname();
 #endif // DB_BACKEND_H_INCLUDED

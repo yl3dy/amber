@@ -5,8 +5,8 @@ OBJECTS=$(addprefix $(OBJDIR)/,$(SOURCES:.c=.o))
 EXECUTABLE=oberon
 
 CC=g++
-CCFLAGS=-Wall -g -I/usr/include/mysql -DUSE_OLD_FUNCTIONS
-LDFLAGS=-lmysqlclient -lboost_regex
+CCFLAGS=-Wall -g -I/usr/include/mysql 
+LDFLAGS=-lmysqlclient -lboost_regex 
 
 all: $(SOURCES) $(EXECUTABLE)
 
