@@ -15,6 +15,7 @@ void amber_host_add()
 		std::cout << "Wrong hostname\n";
 	if(boost::regex_match(ip_addr, chk_ip_addr))
 		std::cout << "Wrong ip\n";
-    amber_db_init_all();
+
+    amber_db_standart_init();
 	amber_db_insert_host_union(custom_hostname.c_str(), ip_addr.c_str());
 }

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "init.hpp"
+#include "hostadd.h"
 void print_usage();
 
 int main(int argc, char **argv)
@@ -18,7 +19,7 @@ int main(int argc, char **argv)
     }
     else if(strcmp(argv[1],"hostadd")==0)
     {
-        
+        amber_host_add();
     }
     else if(strcmp(argv[1],"hostdel")==0)
     {

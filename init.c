@@ -17,6 +17,6 @@ void init()
     amber_db_enter();
     sprintf(buf,"CREATE TABLE HOST_UNION (name VARCHAR (200)  NOT NULL,ip_addr VARCHAR (20)  NOT NULL,PRIMARY KEY (ip_addr))");
     amber_db_query(buf);
-    sprintf(buf,"CREATE TABLE FULINDEX (host VARCHAR (200)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1024)  NOT NULL,size INT(11)),PRIMARY KEY (link)");
+    sprintf(buf,"CREATE TABLE FULLINDEX (host VARCHAR (200)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1024)  NOT NULL,size INT(11)),PRIMARY KEY (link)");
     amber_db_query(buf);
 }
