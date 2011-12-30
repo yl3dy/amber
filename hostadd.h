@@ -1,0 +1,4 @@
+#ifndef HOSTADD_H_INCLUDED
+#define HOSTADD_H_INCLUDED
+
+#endif // HOSTADD_H_INCLUDED
