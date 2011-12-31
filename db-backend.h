@@ -2,6 +2,7 @@
 #define DB_BACKEND_H_INCLUDED
 
 #include <string>
+#include <cstring>
 #include <iostream>
 #include <mysql/my_global.h>
 #include <mysql/my_sys.h>
