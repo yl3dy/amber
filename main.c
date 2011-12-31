@@ -4,6 +4,7 @@
 #include <string.h>
 #include "init.hpp"
 #include "hostadd.h"
+#include "update-host.h"
 void print_usage();
 
 int main(int argc, char **argv)
@@ -35,7 +36,7 @@ int main(int argc, char **argv)
     }
     else if(strcmp(argv[1],"update-host")==0)
     {
-        
+        update_host();
     }
     else
     {
