@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <libgen.h>
+#include <vector>
 #include <sys/stat.h>
 #include "db-backend.h"
 void update_host_work(char *ip);
