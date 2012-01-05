@@ -10,10 +10,10 @@ void init()
 {
     amber_db_init_all();
     char buf[1024];
-    sprintf(buf,"DROP DATABASE IF EXISTS %s",amber_db_getname());
-    amber_db_query(buf);
-    sprintf(buf,"CREATE DATABASE %s",amber_db_getname());
-    amber_db_query(buf);
+    //sprintf(buf,"DROP DATABASE IF EXISTS %s",amber_db_getname());
+    //amber_db_query(buf);
+    //sprintf(buf,"CREATE DATABASE %s",amber_db_getname());
+    //amber_db_query(buf);
     amber_db_enter();
     sprintf(buf,"CREATE TABLE HOST_UNION (name VARCHAR (200)  NOT NULL,ip_addr VARCHAR (20)  NOT NULL,PRIMARY KEY (ip_addr))");
     amber_db_query(buf);
