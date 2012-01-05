@@ -6,6 +6,10 @@ void amber_db_init_all()
     mysql_init(&mysql);
     mysql_real_connect(&mysql,"localhost","root","windfree7",NULL,0,NULL,0);
 }
+void amber_db_close()
+{
+    mysql_close(&mysql);
+}
 void amber_db_enter()
 {
     mysql_select_db(&mysql,db_name);

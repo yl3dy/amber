@@ -10,7 +10,6 @@ void work_with_shara(const char *ip,const char *fold)
     
     if(fp==NULL) 
         printf("WTF? \n");//,buff);
-    amber_db_standart_init();
     fgets( buff,1024, fp);
     while(!feof(fp))
     {
@@ -57,5 +56,8 @@ void update_host()
     char ip[80];
     std::cin>>ip;
     //!!ADD CHECKING HERE!!!!
+    
+    amber_db_standart_init();
     update_host_work(ip);
+    
 }

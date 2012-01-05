@@ -15,8 +15,16 @@ void init()
     //sprintf(buf,"CREATE DATABASE %s",amber_db_getname());
     //amber_db_query(buf);
     amber_db_enter();
-    sprintf(buf,"CREATE TABLE HOST_UNION (name VARCHAR (200)  NOT NULL,ip_addr VARCHAR (20)  NOT NULL,PRIMARY KEY (ip_addr))");
+    sprintf(buf,"DROP TABLE IF EXISTS HOST_UNION");
     amber_db_query(buf);
-    sprintf(buf,"CREATE TABLE FULLINDEX (host VARCHAR (200)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1000)  NOT NULL,size INT(11),PRIMARY KEY (link))");
+    sprintf(buf,"DROP TABLE IF EXISTS FULLINDEX");
+    amber_db_query(buf);
+    sprintf(buf,"DROP TABLE IF EXISTS TEMPINDEX");
+    amber_db_query(buf);
+    sprintf(buf,"CREATE TABLE HOST_UNION (name VARCHAR (256)  NOT NULL,ip_addr VARCHAR (20)  NOT NULL,PRIMARY KEY (ip_addr))");
+    amber_db_query(buf);
+    sprintf(buf,"CREATE TABLE FULLINDEX (host VARCHAR (256)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1000)  NOT NULL,size INT(11))");
+    amber_db_query(buf);
+    sprintf(buf,"CREATE TABLE TEMPINDEX (host VARCHAR (256)  NOT NULL,path VARCHAR (1024)  NOT NULL,name VARCHAR (1024)  NOT NULL, link VARCHAR (1000)  NOT NULL,size INT(11))");
     amber_db_query(buf);
 }
