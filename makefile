@@ -8,14 +8,16 @@ CC=g++
 CCFLAGS=-Wall -g -I/usr/include/mysql 
 LDFLAGS=-lmysqlclient -lboost_regex -lboost_filesystem -lboost_system
 
-all: $(SOURCES) $(EXECUTABLE)
+all: prepare $(SOURCES) $(EXECUTABLE)
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(CCFLAGS) $(LDFLAGS) -o $@ $^
 
 $(OBJDIR)/%.o: %.c $(HEADERS)
-	ls obj > /dev/null 2>&1 || mkdir obj
 	$(CC) $(CCFLAGS) -c -o $@ $<
 
 clean:
 	rm -f obj/* $(EXECUTABLE)
+
+prepare:
+	ls obj > /dev/null 2>&1 || mkdir obj
