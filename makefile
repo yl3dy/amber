@@ -6,7 +6,7 @@ EXECUTABLE=oberon
 
 CC=g++
 CCFLAGS=-Wall -g -I/usr/include/mysql 
-LDFLAGS=-lmysqlclient -lboost_regex 
+LDFLAGS=-lmysqlclient -lboost_regex -lboost_filesystem -lboost_system
 
 all: $(SOURCES) $(EXECUTABLE)
 
