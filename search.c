@@ -9,7 +9,7 @@ void search()
     char st[1024];
     sprintf(st,"SELECT name,host,link  from FULLINDEX where (locate('%s',name)>0);",Quest);
     Result * Our=amber_db_search(st,&res);
-    std::cout<<res<<std::endl;
+   // std::cout<<res<<std::endl;
     for(int i=0;i<res;i++)
     {
         std::cout<<Our[i].link<<'\n';

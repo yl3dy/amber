@@ -1,5 +1,5 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang=ru>
+<!--eeeeCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"-->
+<ht1ml lang=ru>
 
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="content-type">
@@ -13,24 +13,48 @@
 <div id="container">
     <div id="header"><img src="/images/logo.png"></div>
 <?php
-function chec_search()
+function check_search()
 {
 	if($_GET['s']==1)
 	{
-		$f=popen("oberon search")
-		fwrite($f,$_POST['quest']);
+		$descriptorspec = array(
+		   0 => array("pipe", "r"),  // stdin - канал, из которого дочерний процесс будет читать
+  		   1 => array("pipe", "w"),  // stdout - канал, в который дочерний процесс будет записывать 
+  		   2 => array("file", "/tmp/error-output.txt", "a") // stderr - файл для записи;
+		);
 
-		while (! feof($f))
-		{
-			$line = fgets($f, 4096);
-			print $line. "<br>";
+		$process = proc_open('oberon search', $descriptorspec, $pipes, NULL, NULL);
+
+		if (is_resource($process)) {
+    		// $pipes теперь выглядит так:
+    		// 0 => записывающий обработчик, подключенный к дочернему stdin
+    		// 1 => читающий обработчик, подключенный к дочернему stdout
+   			 // Вывод сообщений об ошибках будет добавляться в /tmp/error-output.txt
+		
+    		fwrite($pipes[0], htmlspecialchars($_POST['quest']));
+    		fclose($pipes[0]);
+			$col_vo=0;
+	
+			$strt=stream_get_contents($pipes[1]);
+			$arr=explode("\n",$strt);
+
+			foreach ($arr as $tt)
+			{
+				echo  '<a href="'.$tt.'">'.$tt.'</a><br/>';
+			} 
+//    fclose($pipes[1]);
+//			$col_vo=fread($pipes[1],2046)
+//			echo $colvo
+    		fclose($pipes[1]);
+
+			 proc_close($process);
 		}
-		fclose($f) 
 	}
+
 }
 function show_search() {
 	echo '	<div id="searchbar">';
-	echo '	<form action="index.php?s=1">
+	echo '	<form action="index.php?s=1" method="post">
 			<input type="text" name="quest"/>
 			<input type="submit"/>
 			</form>';
