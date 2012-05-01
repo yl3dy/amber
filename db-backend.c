@@ -4,7 +4,7 @@ MYSQL mysql;
 void amber_db_init_all()
 {
     mysql_init(&mysql);
-    mysql_real_connect(&mysql,"localhost","root","windfree7",NULL,0,NULL,0);
+    mysql_real_connect(&mysql,"localhost","amber","windfree7",NULL,0,NULL,0);
 }
 void amber_db_close()
 {
