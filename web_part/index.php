@@ -1,5 +1,6 @@
 <?php include "lib/lib.php";
 show_menu("news");
+chec_search();
 ?>
 
 <div id="itemblock">

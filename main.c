@@ -9,6 +9,7 @@ using std::cout; using std::cerr;
 
 #include "init.hpp"
 #include "hostadd.h"
+#include "search.h"
 #include "update-host.h"
 void print_usage();
 
@@ -39,11 +40,12 @@ int main(int argc, char **argv)
     }
     else if(strcmp(argv[1],"search")==0)
     {
-       if(!is_locked())
-	   {
+     //  if(!is_locked())
+	   //{
            // do some search
-           cout << "Searching\n";
-	   }
+            search();
+           //cout << "Searching\n";
+	   //}
     }
     else if(strcmp(argv[1],"update-all")==0)
     {

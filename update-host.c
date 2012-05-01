@@ -25,6 +25,7 @@ void work_with_shara(const char *ip,const char *fold)
         stat(tmp.c_str(),&sb);
         
         amber_db_insert_fullindex(ip,dirn,file_nm,(long long)sb.st_size);
+       // printf(file_nm);
         fgets( buff,1024, fp); 
     }
 		

@@ -13,9 +13,27 @@
 <div id="container">
     <div id="header"><img src="/images/logo.png"></div>
 <?php
+function chec_search()
+{
+	if($_GET['s']==1)
+	{
+		$f=popen("oberon search")
+		fwrite($f,$_POST['quest']);
+
+		while (! feof($f))
+		{
+			$line = fgets($f, 4096);
+			print $line. "<br>";
+		}
+		fclose($f) 
+	}
+}
 function show_search() {
 	echo '	<div id="searchbar">';
-	echo '		[________________________________________________________________________] [Поиск]';
+	echo '	<form action="index.php?s=1">
+			<input type="text" name="quest"/>
+			<input type="submit"/>
+			</form>';
 	echo '	</div>';
 }
 function show_menu($name) {
