@@ -1,10 +1,12 @@
 from django.conf.urls import patterns, include, url
+from amber_frontend.views import mainpage
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
 # admin.autodiscover()
 
 urlpatterns = patterns('',
+    url(r'^$', mainpage),
     # Examples:
     # url(r'^$', 'amber_frontend.views.home', name='home'),
     # url(r'^amber_frontend/', include('amber_frontend.foo.urls')),
