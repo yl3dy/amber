@@ -1,14 +1,14 @@
-{% load staticfiles %}
+{% load static %}
 <!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <meta http-equiv="Content-Language" content="ru-ru">
         <title>Amber search system</title>
-        <link rel="stylesheet" type="text/css" href="{% static "styles.css" %}">
+        <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}styles.css">
     </head>
     <body>
-        <div id="header_img"><img src="{% static "logo.png" %}"></div>
+        <div id="header_img"><img src="{% get_static_prefix %}logo.png"></div>
         <div id="searchbar">
             <form action="/" method="post">
                 <input class="textfield" type="text" name="query" width=800>
@@ -16,7 +16,7 @@
             </form>
         </div>
         <div id="messages">Warning! Currently under heavy development!</div>
-        <div id="search_results"></div>
+        <div id="search_results">{{ search_output }}</div>
         <div id="footer"></div>
     </body>
 </html>
