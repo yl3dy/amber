@@ -16,55 +16,58 @@ import sys
 import os
 from pymongo import Connection
 from os.path import exists, join
-from commands import getoutput
+import smbc
+
+# smbc entry types
+SMBC_FILE = 8L
+SMBC_DIR = 7L
+SMBC_SERVICE = 3L
 
 def addr2name(addr):
     return addr.replace('.', ',')
-
-def init_host(host):
-    services = []
-    lines = getoutput('smbclient -g -N -L //'+host+'/')
-    for line in lines.split('\n'):
-        if line[0:4] == 'Disk':
-            services.append(line.split('|')[1])
-    return services
-
-def mount_service(service, host):
-    if not exists(MOUNT_PATH):
-        os.mkdir(MOUNT_PATH)
-    if os.system('smbmount -o guest //'+host+'/'+service+'/ '+MOUNT_PATH) == 0:
-        return True
-    else:
-        return False
-
-def umount_service():
-    os.system('umount '+MOUNT_PATH)
 
 def update_all_hosts():
     pass
 
 def update_host(host):
-    def add_entry(root, f=None):
-        path = root.replace(MOUNT_PATH, '', 1)
-        storage.insert({
-                        '_id': os.path.join(path, f) if f else path,
-                        'name': f if f else os.path.basename(path),
-                        'type': 'file' if f else 'dir',
-                       })
+    def smb_walk(ctx, host):
+        """ Generator to walk around SMB tree """
+        cache = [ [], ]
+        item_type = lambda entry: 'file' if entry.smbc_type == SMBC_FILE else 'dir'
+
+        # initial filling of cache
+        for item in ctx.opendir('smb://'+host+'/').getdents():
+            if item.smbc_type == SMBC_SERVICE:
+                cache[0].append(('smb://'+host+'/'+item.name, item_type(item)))
+        while cache != []:
+            #print cache
+            item = cache[-1].pop()
+            yield item
+            if item[1] == 'dir':
+                try:
+                    tmp = []
+                    for entry in ctx.opendir(item[0]).getdents():
+                        if (entry.name <> '..') and (entry.name <> '.'):
+                            tmp.append((item[0]+'/'+entry.name, item_type(entry)))
+                    cache.append(tmp)
+                except smbc.PermissionError:
+                    pass
+            while cache and cache[-1] == []: 
+                #print 'pop'
+                cache.pop()
 
     print('Updating host ' + host)
     db = Connection()[addr2name(host)]
     storage = db['listing_new']
     storage_old = db['listing']
+    ctx = smbc.Context()
 
-    for service in init_host(host):
-        if not mount_service(service, host): continue
-        for root, dirs, files in os.walk(MOUNT_PATH):
-            for entry in files: add_entry(root, entry)
-            add_entry(root)     # add current dir
-        umount_service()
-
-    #storage_old.drop()
+    for entry in smb_walk(ctx, host):
+        storage.insert({
+                        '_id': entry[0],
+                        'name': os.path.split(entry[0])[1],
+                        'type': entry[1],
+                       })
     storage.rename('listing', dropTarget=True)
 
 if __name__ == '__main__':
