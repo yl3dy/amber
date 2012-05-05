@@ -13,6 +13,7 @@ In database names . are replaced with ,
 
 from settings import *
 import sys
+import os
 from pymongo import Connection
 from os.path import exists, join
 from commands import getoutput
@@ -31,26 +32,40 @@ def init_host(host):
 def mount_service(service, host):
     if not exists(MOUNT_PATH):
         os.mkdir(MOUNT_PATH)
-    os.system('sudo -u '+USERNAME+' smbclient -o guest //'+host+'/ '+MOUNT_PATH)
+    if os.system('smbmount -o guest //'+host+'/'+service+'/ '+MOUNT_PATH) == 0:
+        return True
+    else:
+        return False
+
+def umount_service():
+    os.system('umount '+MOUNT_PATH)
 
 def update_all_hosts():
     pass
 
 def update_host(host):
+    def add_entry(root, f=None):
+        path = root.replace(MOUNT_PATH, '', 1)
+        storage.insert({
+                        '_id': os.path.join(path, f) if f else path,
+                        'name': f if f else os.path.basename(path),
+                        'type': 'file' if f else 'dir',
+                       })
+
+    print('Updating host ' + host)
     db = Connection()[addr2name(host)]
     storage = db['listing_new']
     storage_old = db['listing']
 
-    #for service in init_host(host):
-    #    mount_service(service, host)
-    #    for root, dirs, files in os.walk(MOUNT_PATH):
-    #        for f in files:
-    #            storage.insert({
-    #                            'path': join(root, f),
-    #                            'type': 'file'
-    #                           })
+    for service in init_host(host):
+        if not mount_service(service, host): continue
+        for root, dirs, files in os.walk(MOUNT_PATH):
+            for entry in files: add_entry(root, entry)
+            add_entry(root)     # add current dir
+        umount_service()
+
     #storage_old.drop()
-    #storage.rename('listing')
+    storage.rename('listing', dropTarget=True)
 
 if __name__ == '__main__':
     print('Oberon crawler v0.0.1')
@@ -60,5 +75,4 @@ if __name__ == '__main__':
         update_all_hosts()
     else:
         for host in sys.argv[1:]:
-            print('Updating host ' + host)
             update_host(host)
