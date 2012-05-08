@@ -1,3 +1,4 @@
+{% spaceless %}
 {% load static %}
 <!DOCTYPE html>
 <html>
@@ -8,15 +9,24 @@
         <link rel="stylesheet" type="text/css" href="{% get_static_prefix %}styles.css">
     </head>
     <body>
-        <div id="header_img"><img src="{% get_static_prefix %}logo.png"></div>
-        <div id="searchbar">
-            <form action="/" method="post">
-                <input class="textfield" type="text" name="query" width=800>
-                <input class="search_button" type="submit">
-            </form>
-        </div>
-        <div id="messages">Warning! Currently under heavy development!</div>
-        <div id="search_results">{{ search_output }}</div>
-        <div id="footer"></div>
+        <header id="header_img"><img src="{% get_static_prefix %}logo.png"></div>
+        <form action="/" method="get">
+            <input type="text" name="q"{% if search_string %} value="{{ search_string }}"{% endif %}>
+            <button>Поиск</button>
+        </form>
+        <div id="messages">Timing: {{ search_time }}</div>
+        <div>{{ performance }}</div>
+        {% if search_string %}
+        {% if search_output %}
+        <ol>
+            {% for item in search_output %}
+                <li><b>{{ item.name }}:</b> {{ item }} </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+            <p>I DUNNO LOL</p>
+        {% endif %}
+        {% endif %}
     </body>
 </html>
+{% endspaceless %}

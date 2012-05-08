@@ -1,0 +1,7 @@
+Database format for Amber search system
+=======================================
+
+Each host is a separate database with host ip/name (CHECK). In each database
+is one collection "listing" which contains documents representing files.
+Each document is really Python dictionary. Fields are path, size and modification
+time (at the beginning only path as unicode string).
