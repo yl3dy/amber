@@ -23,8 +23,20 @@ SMBC_FILE = 8L
 SMBC_DIR = 7L
 SMBC_SERVICE = 3L
 
+DELIMITERS = (' ', '.', '-', '_', ',')
+
 def addr2name(addr):
     return addr.replace('.', ',')
+
+def split_subnames(name):
+    result = []
+    start = 0
+    for i in xrange(len(name)):
+        if name[i] in DELIMITERS:
+            result.append(name[start:i])
+            start = i + 1
+    result.append(name[start:])
+    return result
 
 def update_all_hosts():
     pass
@@ -69,7 +81,7 @@ def update_host(host):
         storage.insert({
                         '_id': entry[0],
                         'name': entryname,
-                        'subnames': entryname.lower().split(' '),
+                        'subnames': split_subnames(entryname),
                         'type': entry[1],
                        })
     storage.rename('listing', dropTarget=True)
