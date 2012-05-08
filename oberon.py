@@ -40,7 +40,6 @@ def update_host(host):
             if item.smbc_type == SMBC_SERVICE:
                 cache[0].append(('smb://'+host+'/'+item.name, item_type(item)))
         while cache != []:
-            #print cache
             item = cache[-1].pop()
             yield item
             if item[1] == 'dir':
@@ -52,8 +51,11 @@ def update_host(host):
                     cache.append(tmp)
                 except smbc.PermissionError:
                     pass
+                except smbc.NoEntryError:
+                    print('Can\'t read entry named '+item[0])
+                except:
+                    print('Random fail has happened on entry '+item[0]+' which is '+item[1])
             while cache and cache[-1] == []: 
-                #print 'pop'
                 cache.pop()
 
     print('Updating host ' + host)
@@ -63,9 +65,11 @@ def update_host(host):
     ctx = smbc.Context()
 
     for entry in smb_walk(ctx, host):
+        entryname = os.path.split(entry[0])[1]
         storage.insert({
                         '_id': entry[0],
-                        'name': os.path.split(entry[0])[1],
+                        'name': entryname,
+                        'subnames': entryname.lower().split(' '),
                         'type': entry[1],
                        })
     storage.rename('listing', dropTarget=True)
