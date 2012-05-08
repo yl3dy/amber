@@ -81,7 +81,7 @@ def update_host(host):
         storage.insert({
                         '_id': entry[0],
                         'name': entryname,
-                        'subnames': split_subnames(entryname),
+                        'subnames': split_subnames(entryname.lower()),
                         'type': entry[1],
                        })
     storage.rename('listing', dropTarget=True)

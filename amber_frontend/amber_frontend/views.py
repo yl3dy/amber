@@ -4,14 +4,28 @@ import pymongo
 import re
 from datetime import datetime
 
-SERVER_NAMES = ('stonehenge-3,sytes,net','dgap-gw,campus')
+#SERVER_NAMES = ('stonehenge-3,sytes,net','dgap-gw,campus', 'nables,campus,mipt,ru')
+SERVER_NAMES = ('stonehenge-3,sytes,net', 'nables,campus,mipt,ru')
 RESULT_NUM = 100
+DELIMITERS = (' ', '.', '-', '_', ',')
+
+def split_subnames(name):
+    result = []
+    start = 0
+    for i in xrange(len(name)):
+        if name[i] in DELIMITERS:
+            result.append(name[start:i])
+            start = i + 1
+    result.append(name[start:])
+    return result
 
 def search(query):
     system = pymongo.Connection()
     results = []
     for dbname in SERVER_NAMES:
-        s_r = system[dbname]['listing'].find({'subnames': query.lower()}).limit(RESULT_NUM - len(results))
+        s_r = system[dbname]['listing'].find(
+                                            {'subnames': {'$all': split_subnames(query.lower())}}
+                                            ).limit(RESULT_NUM - len(results))
         results += list(s_r)
     return results, s_r.explain()
 
