@@ -1,0 +1,43 @@
+{% spaceless %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>Amber search system</title>
+
+        <link rel="icon" type="image/png" href="{% get_static_prefix %}favic.png" />
+        <link rel="stylesheet" href="{% get_static_prefix %}styles.css">
+    </head>
+    <body>
+        <header></header>
+        <form>
+            <input name="q"{% if search_string %} value="{{ search_string }}"{% endif %}>
+            <button>Поиск</button>
+        </form>
+        {% if search_time or search_time %}
+            <div class="message">
+                {% if search_time or search_time %}
+                    <p>Timing: {{ search_time }}</p>
+                {% endif %}
+
+                {% if search_time %}
+                    <p>{{ performance }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if search_string %}
+            {% if search_output %}
+            <ol>
+                {% for item in search_output %}
+                    <li><b>{{ item.name }}:</b> {{ item }} </li>
+                {% endfor %}
+            </ol>
+            {% else %}
+                <p>I DUNNO LOL</p>
+            {% endif %}
+        {% endif %}
+    </body>
+</html>
+{% endspaceless %}

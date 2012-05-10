@@ -36,4 +36,4 @@ def mainpage(request):
         t = datetime.now()
         search_output,performance = search(search_string)
         search_time = datetime.now() - t
-    return render_to_response('index.html', {'search_output': search_output, 'search_string': search_string, 'search_time': search_time, 'performance': performance})
+    return render_to_response('main.html', {'search_output': search_output, 'search_string': search_string, 'search_time': search_time, 'performance': performance})

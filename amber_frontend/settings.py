@@ -10,17 +10,6 @@ ADMINS = (
 
 MANAGERS = ADMINS
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': '',                      # Or path to database file if using sqlite3.
-        'USER': '',                      # Not used with sqlite3.
-        'PASSWORD': '',                  # Not used with sqlite3.
-        'HOST': '',                      # Set to empty string for localhost. Not used with sqlite3.
-        'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
-    }
-}
-
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
 # although not all choices may be available on all operating systems.
@@ -34,7 +23,7 @@ TIME_ZONE = 'Europe/Moscow'
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
 
-SITE_ID = 1
+#SITE_ID = 1
 
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
@@ -69,9 +58,6 @@ STATIC_URL = '/static/'
 # Additional locations of static files
 STATICFILES_DIRS = (
     os.path.join(os.path.dirname(__file__), 'static'),
-    # Put strings here, like "/home/html/static" or "C:/www/django/static".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
 )
 
 # List of finder classes that know how to find static files in
@@ -104,9 +90,6 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'amber_frontend.urls'
 
-# Python dotted path to the WSGI application used by Django's runserver.
-WSGI_APPLICATION = 'amber_frontend.wsgi.application'
-
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
@@ -115,10 +98,10 @@ TEMPLATE_DIRS = (
 )
 
 INSTALLED_APPS = (
-    'django.contrib.auth',
+#    'django.contrib.auth',
     'django.contrib.contenttypes',
 #    'django.contrib.sessions',
-    'django.contrib.sites',
+#    'django.contrib.sites',
 #    'django.contrib.messages',
     'django.contrib.staticfiles',
     # Uncomment the next line to enable the admin:
