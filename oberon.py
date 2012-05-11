@@ -33,7 +33,8 @@ def split_subnames(name):
     start = 0
     for i in xrange(len(name)):
         if name[i] in DELIMITERS:
-            result.append(name[start:i])
+            if start != i:
+                result.append(name[start:i])
             start = i + 1
     result.append(name[start:])
     return result
