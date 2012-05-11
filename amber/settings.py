@@ -1,4 +1,4 @@
-# Django settings for amber_frontend project.
+# Django settings for amber project.
 import os
 
 DEBUG = True
@@ -9,6 +9,11 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
+
+MONGO_DB = {
+    'connection': None,
+    'database_name': 'amber',
+}
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -88,7 +93,7 @@ MIDDLEWARE_CLASSES = (
     # 'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'amber_frontend.urls'
+ROOT_URLCONF = 'amber.urls'
 
 TEMPLATE_DIRS = (
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
