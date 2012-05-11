@@ -1,13 +1,13 @@
 #!/usr/bin/python2
 from datetime import datetime
-import smbc
+import smbc, logging
 
 # smbc entry types
 SMBC_FILE = 8L
 SMBC_DIR = 7L
 SMBC_SERVICE = 3L
 
-def host_scanner(host, mongo_collection):
+def scan_host(host, mongo_collection):
     """ Scanning given host and save results in given mongo collection """
 
     mongo_collection.drop()
@@ -54,11 +54,11 @@ def host_scanner(host, mongo_collection):
             return size
 
         except smbc.NoEntryError:
-            print('No entry error: ' + path)
+            logging.exception('No entry error: ' + path)
         except smbc.PermissionError:
-            print('Permission error: ' + path)
+            logging.exception('Permission error: ' + path)
         except:
-            print('Unknown error: ' + path)
+            logging.exception('Unknown error: ' + path)
 
         return 0
 
