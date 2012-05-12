@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.shortcuts import render_to_response
 from mongo_db import mdb, main_collection, servers_collection, split_words
+from django.conf import settings
 from datetime import datetime
 import os
 
@@ -58,12 +59,22 @@ def get_entry_type_query(entry_type):
     return {}
 
 def mainpage(request):
-    search_string = result = server_request = search_time = entry_type = performance = None
     servers = get_servers()
+    response_dict = {
+        'servers': servers,
+        'entry_types': ENTRY_TYPES,
+    }
+
     if request.method == 'GET' and 'q' in request.GET and request.GET['q']:
         search_string = request.GET['q']
         server_request = request.GET.get('server', '')
         entry_type = request.GET.get('entry_type', '')
+
+        response_dict.update({
+            'search_string': search_string,
+            'server_request': server_request,
+            'entry_type': entry_type,
+        })
 
         t = datetime.now()
 
@@ -96,21 +107,15 @@ def mainpage(request):
             result = result.sort('nm', val)
             sort['name'] = val
 
+        response_dict['sort'] = sort
+
         # Setting output limit
         result = result.limit(RESULT_NUM)
 
-        # Looking into performance help
-        performance = result.explain()
-        result = postprocess_results(servers, result)
-        search_time = datetime.now() - t
-    return render_to_response('main.html', {
-            'search_result': result,
-            'search_string': search_string,
-            'search_time': search_time,
-            'performance': None, #performance,
-            'servers': servers,
-            'server_request': server_request,
-            'entry_type': entry_type,
-            'entry_types': ENTRY_TYPES,
-            'sort': sort,
-    })
+        # Looking into performance help if debugging
+        #if settings.DEBUG: response_dict['performance'] = result.explain() 
+
+        response_dict['search_result'] = postprocess_results(servers, result)
+        response_dict['search_time'] = datetime.now() - t
+
+    return render_to_response('main.html', response_dict)
