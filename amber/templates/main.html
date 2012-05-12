@@ -12,7 +12,13 @@
     <body>
         <header></header>
         <form>
-            <input name="q"{% if search_string %} value="{{ search_string }}"{% endif %}>
+            <input name="q" autofocus="autofocus"{% if search_string %} value="{{ search_string }}"{% endif %}>
+            <select name="entry_type">
+                <option value="">Папки и файлы</option>
+                {% for key, entry in entry_types.items %}
+                    <option value="{{ key }}" {% ifequal key entry_type %}selected{% endifequal %}>{{ entry.title }}</option>
+                {% endfor %}
+            </select>
             <select name="server">
                 <option value="">Все сервера</option>
                 {% for key, server in servers.items %}

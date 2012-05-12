@@ -19,5 +19,5 @@ def split_words(name):
             if start != i:
                 result.append(name[start:i])
             start = i + 1
-    result.append(name[start:])
+    if name[start:]: result.append(name[start:])
     return result
