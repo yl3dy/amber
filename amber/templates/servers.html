@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block title %}Amber. Список сканируемых серверов.{% endblock %}
+
+{% block main %}
+    <table border="1">
+        <tr>
+            <th>Имя</th>
+            <th>Хост</th>
+            <th>Активен?</th>
+            <th>Начало скан.</th>
+            <th>Конец скан.</th>
+        </tr>
+        {% for server in servers.values %}
+            <tr>
+                <td>{{ server.name|default:"N/A" }}</td>
+                <td>{{ server.host|default:"N/A" }}</td>
+                <td>{{ server.is_active|yesno:"Да,Нет,?" }}</td>
+                <td>{{ server.scan_start|default:"N/A" }}</td>
+                <td>{{ server.scan_end|default:"N/A" }}</td>
+            </li>
+        {% endfor %}
+    </table>
+{% endblock %}

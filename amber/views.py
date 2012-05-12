@@ -119,3 +119,6 @@ def mainpage(request):
         response_dict['search_time'] = datetime.now() - t
 
     return render_to_response('main.html', response_dict)
+
+def servers(request):
+    return render_to_response('servers.html', {'servers': get_servers()})

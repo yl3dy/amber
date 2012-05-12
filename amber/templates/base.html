@@ -1,0 +1,24 @@
+{% spaceless %}
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>{% block title %}Поисковая система Amber{% endblock %}</title>
+
+        <link rel="icon" type="image/png" href="{% get_static_prefix %}favic.png" />
+        <link rel="stylesheet" href="{% get_static_prefix %}styles.css">
+    </head>
+    <body>
+        <header>
+            <aside>
+                <a href="/servers/">Сервера</a>
+                <a href="/settings/">Настройка</a>
+                <a href="/about/">О приложении</a>
+            </aside>
+            <a href="/"></a>
+        </header>
+        {% block main %}{% endblock %}
+    </body>
+</html>
+{% endspaceless %}

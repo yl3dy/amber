@@ -1,70 +1,58 @@
-{% spaceless %}
-{% load static %}
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <title>Поисковая система Amber</title>
+{% extends "base.html" %}
 
-        <link rel="icon" type="image/png" href="{% get_static_prefix %}favic.png" />
-        <link rel="stylesheet" href="{% get_static_prefix %}styles.css">
-    </head>
-    <body>
-        <header><a href="/"></a></header>
-        <form>
-            <input name="q" autofocus="autofocus"{% if search_string %} value="{{ search_string }}"{% endif %}>
-            <select name="entry_type">
-                <option value="">Папки и файлы</option>
-                {% for key, entry in entry_types.items %}
-                    <option value="{{ key }}" {% ifequal key entry_type %}selected{% endifequal %}>{{ entry.title }}</option>
-                {% endfor %}
-            </select>
-            <select name="server">
-                <option value="">Все сервера</option>
-                {% for key, server in servers.items %}
-                    <option value="{{ key }}" {% ifequal key server_request %}selected{% endifequal %}>{% if server.name %}{{ server.name }}{% else %}{{ server.host }}{% endif %}</option>
-                {% endfor %}
-            </select>
-            <button>Поиск</button>
-            {% if sort %}
-                <div class="sort_buttons">
-                    <span>Сортировать по:</span>
-                    <button name="sort_name" value="{% ifequal sort.name 1 %}-1{% else %}1{% endifequal %}">имени{% if sort.name %}{% ifequal sort.name 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
-                    <button name="sort_size" value="{% ifequal sort.size 1 %}-1{% else %}1{% endifequal %}">размеру{% if sort.size %}{% ifequal sort.size 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
-                    <button name="sort_change" value="{% ifequal sort.change 1 %}-1{% else %}1{% endifequal %}">времени изменения{% if sort.change %}{% ifequal sort.change 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
-                </div>
-            {% endif %}
-        </form>
-        {% if search_time or performance %}
-            <div class="message">
-                {% if search_time %}
-                    <p>Запрос обработан за: {{ search_time }}</p>
-                {% endif %}
-
-                {% if performance %}
-                    <p>{{ performance }}</p>
-                {% endif %}
+{% block main %}
+    <form>
+        <input name="q" autofocus="autofocus"{% if search_string %} value="{{ search_string }}"{% endif %}>
+        <select name="entry_type">
+            <option value="">Папки и файлы</option>
+            {% for key, entry in entry_types.items %}
+                <option value="{{ key }}" {% ifequal key entry_type %}selected{% endifequal %}>{{ entry.title }}</option>
+            {% endfor %}
+        </select>
+        <select name="server">
+            <option value="">Все сервера</option>
+            {% for key, server in servers.items %}
+                <option value="{{ key }}" {% ifequal key server_request %}selected{% endifequal %}>{% if server.name %}{{ server.name }}{% else %}{{ server.host }}{% endif %}</option>
+            {% endfor %}
+        </select>
+        <button>Поиск</button>
+        {% if sort %}
+            <div class="sort_buttons">
+                <span>Сортировать по:</span>
+                <button name="sort_name" value="{% ifequal sort.name 1 %}-1{% else %}1{% endifequal %}">имени{% if sort.name %}{% ifequal sort.name 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
+                <button name="sort_size" value="{% ifequal sort.size 1 %}-1{% else %}1{% endifequal %}">размеру{% if sort.size %}{% ifequal sort.size 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
+                <button name="sort_change" value="{% ifequal sort.change 1 %}-1{% else %}1{% endifequal %}">времени изменения{% if sort.change %}{% ifequal sort.change 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
             </div>
         {% endif %}
-
-        {% if search_string %}
-            {% if search_result %}
-            <ol>
-                {% for entry in search_result %}
-                    <li>
-                        <p class="{% if entry.is_file %}file{% else %}dir{% endif %}">{{ entry.name }} ({{ entry.size }})</p>
-                        <ul>
-                            {% for path in entry.paths %}
-                                <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="smb://{{ path.1|urlencode }}">//{{ path.2 }}</a></li>
-                            {% endfor %}                            
-                        </ul>
-                    </li>
-                {% endfor %}
-            </ol>
-            {% else %}
-                <p id="not_found">Ничего не найдено.</p>
+    </form>
+    {% if search_time or performance %}
+        <div class="message">
+            {% if search_time %}
+                <p>Запрос обработан за: {{ search_time }}</p>
             {% endif %}
+
+            {% if performance %}
+                <p>{{ performance }}</p>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if search_string %}
+        {% if search_result %}
+        <ol>
+            {% for entry in search_result %}
+                <li>
+                    <p class="{% if entry.is_file %}file{% else %}dir{% endif %}">{{ entry.name }} ({{ entry.size }})</p>
+                    <ul>
+                        {% for path in entry.paths %}
+                            <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="smb://{{ path.1|urlencode }}">//{{ path.2 }}</a></li>
+                        {% endfor %}                            
+                    </ul>
+                </li>
+            {% endfor %}
+        </ol>
+        {% else %}
+            <p id="not_found">Ничего не найдено.</p>
         {% endif %}
-    </body>
-</html>
-{% endspaceless %}
+    {% endif %}
+{% endblock %}
