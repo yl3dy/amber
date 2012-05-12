@@ -38,9 +38,7 @@ def postprocess_entry(servers, entry):
 
 def postprocess_results(results):
     servers = get_servers()
-    res = [postprocess_entry(servers, entry) for entry in results]
-    res.sort(key = lambda x: x['name'])
-    return res
+    return [postprocess_entry(servers, entry) for entry in results]
     
 
 def mainpage(request):
@@ -48,7 +46,7 @@ def mainpage(request):
     if request.method == 'GET' and 'q' in request.GET:
         search_string = request.GET.get('q', '')
         t = datetime.now()
-        result = main_collection.find({'wds': {'$all': split_words(search_string.lower())}}).limit(RESULT_NUM)
+        result = main_collection.find({'wds': {'$all': split_words(search_string.lower())}}).sort('nm').limit(RESULT_NUM)
         performance = result.explain()
         search_time = datetime.now() - t
     return render_to_response('main.html', {'search_result': postprocess_results(result), 'search_string': search_string, 'search_time': search_time, 'performance': performance})

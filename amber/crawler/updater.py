@@ -14,7 +14,7 @@ def get_extension(path):
 
 def get_unic_id(data):
     name = get_name(data['_id'])
-    unic_str = name + u':' + str(data['sz'])
+    unic_str = name + u':' + str(data['sz']) + ':' + str(data['ch_t'])
     bin_string = hashlib.md5(unic_str.encode('utf8')).digest()
     return binary.Binary(bin_string, binary.MD5_SUBTYPE)
 
@@ -64,7 +64,6 @@ def update_host(host):
                 entry['_id'] = unic_id
                 entry['s_t'] = datetime.now()
                 entry['nm'] = get_name(path)
-                del entry['ch_t']
                 if entry['is_f']:
                     extension = get_extension(path)
                     if extension: entry['ext'] = extension
