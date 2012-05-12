@@ -7,6 +7,8 @@ SMBC_FILE = 8L
 SMBC_DIR = 7L
 SMBC_SERVICE = 3L
 
+MAX_TRIES = 5
+
 def scan_host(host, mongo_collection):
     """ Scanning given host and save results in given mongo collection """
 
@@ -34,10 +36,12 @@ def scan_host(host, mongo_collection):
         })
 
 
-    def process_entry(root, dent):
+    def process_entry(root, dent, trying=0):
+        path = None
+        size = 0
         try:
-            dent_type = item_type(dent)
             path = root + '/' + dent.name
+            dent_type = item_type(dent)
 
             sum_size = None
             if dent_type == 'dir':
@@ -54,15 +58,27 @@ def scan_host(host, mongo_collection):
             return size
 
         except smbc.NoEntryError:
-            logging.exception('No entry error: ' + path)
+            logging.error('No entry error: ' + path)
         except smbc.PermissionError:
-            logging.exception('Permission error: ' + path)
-        except:
-            logging.exception('Unknown error: ' + path)
+            logging.error('Permission error: ' + path)
+        except smbc.TimedOutError:
+            logging.error('Timed out error: ' + path)
+        except Exception as err:
+            logging.exception('Unknown exception: ' + path)
 
-        return 0
+        if trying < MAX_TRIES:
+            size = process_entry(root, dent, trying+1)
+
+        return size
 
 
-    for entry in ctx.opendir(smb_host).getdents():
-        if entry.smbc_type == SMBC_SERVICE:
-            process_entry(smb_host, entry)
+    entries = []
+    try:
+        for entry in ctx.opendir(smb_host).getdents():
+            if entry.smbc_type == SMBC_SERVICE:
+                entries.append(entry)
+    except Exception as err:
+        logging.exception('Failed to scan host: ' + smb_host)
+        return 'fail'
+
+    for entry in entries: process_entry(smb_host, entry)
