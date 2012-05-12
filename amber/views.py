@@ -11,7 +11,7 @@ ENTRY_TYPES = {
     'files': {'title': 'Файлы', 'is_file': True},
     'video': {'title': 'Видео', 'extensions': ['mp4', 'avi', '3gp', 'rmvb', 'wmv', 'mkv', 'mpg', 'mov', 'vob', 'flv', 'swf', 'ogm']},
     'music': {'title': 'Музыка', 'extensions': ['mp3', 'wma', 'flac', 'aac', 'mmf', 'amr', 'm4a', 'm4r', 'ogg', 'mp2', 'wav']},
-    'pictures': {'title': 'Изображения', 'extensions': ['jpg', 'png', 'ico', 'bmp', 'gif', 'tif', 'pcx', 'tga']},
+    'pictures': {'title': 'Изображения', 'extensions': ['jpg', 'jpeg', 'png', 'ico', 'bmp', 'gif', 'tif', 'tiff', 'pcx', 'tga', 'nef']},
     'books': {'title': 'Книги', 'extensions': ['djvu', 'pdf', 'epub', 'fb2', 'html', 'htm', 'txt', 'ps', 'doc', 'rtf']},
 }
 
@@ -67,12 +67,39 @@ def mainpage(request):
 
         t = datetime.now()
 
+        # Basic search through name, type and server
         search_dict = {'wds': {'$all': split_words(search_string.lower())}}
         if server_request: search_dict['srvs.' + server_request] = {'$exists': True}
         if entry_type: search_dict.update(get_entry_type_query(entry_type))
+        result = main_collection.find(search_dict)
 
-        result = main_collection.find(search_dict).sort('nm').limit(RESULT_NUM)
+        # Choosing how to sort
+        sort = {
+            'name': None,
+            'size': None,
+            'change': None,
+        }
+        if 'sort_name' in request.GET:
+            val = int(request.GET['sort_name'])
+            result = result.sort('nm', val)
+            sort['name'] = val
+        elif 'sort_size' in request.GET:
+            val = int(request.GET['sort_size'])
+            result = result.sort('sz', val)
+            sort['size'] = val
+        elif 'sort_change' in request.GET:
+            val = int(request.GET['sort_change'])
+            result = result.sort('ch_t', val)
+            sort['change'] = val
+        else:
+            val = 1
+            result = result.sort('nm', val)
+            sort['name'] = val
 
+        # Setting output limit
+        result = result.limit(RESULT_NUM)
+
+        # Looking into performance help
         performance = result.explain()
         result = postprocess_results(servers, result)
         search_time = datetime.now() - t
@@ -85,4 +112,5 @@ def mainpage(request):
             'server_request': server_request,
             'entry_type': entry_type,
             'entry_types': ENTRY_TYPES,
+            'sort': sort,
     })

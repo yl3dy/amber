@@ -26,6 +26,12 @@
                 {% endfor %}
             </select>
             <button>Поиск</button>
+            <div class="sort_buttons">
+                <span>Сортировать по:</span>
+                <button name="sort_name" value="{% ifequal sort.name 1 %}-1{% else %}1{% endifequal %}">имени{% if sort.name %}{% ifequal sort.name 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
+                <button name="sort_size" value="{% ifequal sort.size 1 %}-1{% else %}1{% endifequal %}">размеру{% if sort.size %}{% ifequal sort.size 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
+                <button name="sort_change" value="{% ifequal sort.change 1 %}-1{% else %}1{% endifequal %}">времени изменения{% if sort.change %}{% ifequal sort.change 1 %}▼{% else %}▲{% endifequal %}{% endif %}</button>
+            </div>
         </form>
         {% if search_time or performance %}
             <div class="message">

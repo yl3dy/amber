@@ -26,6 +26,10 @@ body>form>select {
 body>form>button {
     font-size: 120%;
 }
+body>form>div.sort_buttons {
+    text-align: left;
+    padding-left: 15%;
+}
 
 .message {
     text-align: center;
