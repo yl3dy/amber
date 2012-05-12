@@ -15,27 +15,34 @@
             <input name="q"{% if search_string %} value="{{ search_string }}"{% endif %}>
             <button>Поиск</button>
         </form>
-        {% if search_time or search_time %}
+        {% if search_time or performance %}
             <div class="message">
-                {% if search_time or search_time %}
+                {% if search_time %}
                     <p>Timing: {{ search_time }}</p>
                 {% endif %}
 
-                {% if search_time %}
+                {% if performance %}
                     <p>{{ performance }}</p>
                 {% endif %}
             </div>
         {% endif %}
 
         {% if search_string %}
-            {% if search_output %}
+            {% if search_result %}
             <ol>
-                {% for item in search_output %}
-                    <li><b>{{ item.name }}:</b> {{ item }} </li>
+                {% for entry in search_result %}
+                    <li>
+                        <p class="{% if entry.is_file %}file{% else %}dir{% endif %}">{{ entry.name }} ({{ entry.size }})</p>
+                        <ul>
+                            {% for path in entry.paths %}
+                                <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="{{ path.1|urlencode }}">{{ path.1 }}</a></li>
+                            {% endfor %}                            
+                        </ul>
+                    </li>
                 {% endfor %}
             </ol>
             {% else %}
-                <p>I DUNNO LOL</p>
+                <p>No data.</p>
             {% endif %}
         {% endif %}
     </body>
