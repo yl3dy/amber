@@ -53,7 +53,7 @@ def update_host(host):
         if unic_id in ids:
             main_collection.update({'_id': unic_id}, {'$push': {'server.' + server_id: entry['_id']}, '$set': {'s_t': datetime.now()}}, multi=True)
         else:
-            ids[unic_id] = entry
+            ids[unic_id] = None
             # Overwiting path for this host
             resp = main_collection.update({'_id': unic_id}, {'$set': {'server.' + server_id: [entry['_id']]}, '$set': {'s_t': datetime.now()}}, safe=True, multi=True)
             # Creating new entry if was updated nothing

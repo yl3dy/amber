@@ -60,8 +60,8 @@ def get_entry_type_query(entry_type):
 def mainpage(request):
     search_string = result = server_request = search_time = entry_type = performance = None
     servers = get_servers()
-    if request.method == 'GET' and 'q' in request.GET:
-        search_string = request.GET.get('q', '')
+    if request.method == 'GET' and 'q' in request.GET and request.GET['q']:
+        search_string = request.GET['q']
         server_request = request.GET.get('server', '')
         entry_type = request.GET.get('entry_type', '')
 
