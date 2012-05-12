@@ -9,6 +9,24 @@ SMBC_SERVICE = 3L
 
 MAX_TRIES = 5
 
+def percent_encode(string):
+    encode_table = {
+                    '!': '%21',
+                    '&': '%26',
+                    '?': '%3F',
+                    '%': '%25',
+                    '~': '%7E',
+                    '[': '%5B',
+                    ']': '%5D',
+                   }
+    result = ''
+    for i in range(len(string)):
+        if string[i] in encode_table:
+            result += encode_table[string[i]]
+        else:
+            result += string[i]
+    return result
+
 def scan_host(host, mongo_collection):
     """ Scanning given host and save results in given mongo collection """
 
@@ -21,7 +39,7 @@ def scan_host(host, mongo_collection):
     item_type = lambda entry: 'file' if entry.smbc_type == SMBC_FILE else 'dir'
 
     def get_metainfo(path):
-        data = ctx.stat(path)
+        data = ctx.stat(percent_encode(path))
         change_time = datetime.fromtimestamp(data[8])
         size = data[6]
         return change_time, size
@@ -46,7 +64,7 @@ def scan_host(host, mongo_collection):
             sum_size = None
             if dent_type == 'dir':
                 sum_size = 0
-                for entry in ctx.opendir(path).getdents():
+                for entry in ctx.opendir(percent_encode(path)).getdents():
                     if entry.name not in ['..', '.']:
                         sum_size += process_entry(path, entry)
 
