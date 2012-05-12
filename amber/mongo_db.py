@@ -9,7 +9,7 @@ main_collection = mdb['main_collection']
 servers_collection = mdb['servers']
 
 # Temporarly will be placed here
-DELIMITERS = (' ', '.', '-', '_', ',', '[', ']', '(', ')')
+DELIMITERS = (' ', '.', '-', '_', ',', '[', ']', '(', ')', '?', '!', '<', '>', '{', '}', '"', "'")
 
 def split_words(name):
     result = []

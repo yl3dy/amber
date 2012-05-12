@@ -74,12 +74,13 @@ def mainpage(request):
         result = main_collection.find(search_dict).sort('nm').limit(RESULT_NUM)
 
         performance = result.explain()
+        result = postprocess_results(servers, result)
         search_time = datetime.now() - t
     return render_to_response('main.html', {
-            'search_result': postprocess_results(servers, result),
+            'search_result': result,
             'search_string': search_string,
             'search_time': search_time,
-            'performance': performance,
+            'performance': None, #performance,
             'servers': servers,
             'server_request': server_request,
             'entry_type': entry_type,

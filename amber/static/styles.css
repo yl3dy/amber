@@ -54,3 +54,9 @@ ol>li>ul>li {
 ol>li>ul>li.inactive a {
     color: #AAA; 
 }
+
+#not_found {
+    font-size: 200%;
+    text-align: center;
+    font-weight: bold;
+}
