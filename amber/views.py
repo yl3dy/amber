@@ -19,7 +19,8 @@ def get_paths(servers, paths):
         for path in paths[server_id]:
             res.append((
                 server['is_active'],
-                'smb://' + os.path.join(server['host'], path)
+                os.path.join(server['host'], path),
+                os.path.join(server['name'], path) if 'name' in server else os.path.join(server['host'], path),
             ))
     return res
 

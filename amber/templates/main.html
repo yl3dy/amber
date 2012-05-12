@@ -35,7 +35,7 @@
                         <p class="{% if entry.is_file %}file{% else %}dir{% endif %}">{{ entry.name }} ({{ entry.size }})</p>
                         <ul>
                             {% for path in entry.paths %}
-                                <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="{{ path.1|urlencode }}">{{ path.1 }}</a></li>
+                                <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="smb://{{ path.1|urlencode }}">//{{ path.2 }}</a></li>
                             {% endfor %}                            
                         </ul>
                     </li>
