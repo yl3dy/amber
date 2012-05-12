@@ -13,6 +13,12 @@
         <header></header>
         <form>
             <input name="q"{% if search_string %} value="{{ search_string }}"{% endif %}>
+            <select name="server">
+                <option value="">Все сервера</option>
+                {% for key, server in servers.items %}
+                    <option value="{{ key }}" {% ifequal key server_request %}selected{% endifequal %}>{% if server.name %}{{ server.name }}{% else %}{{ server.host }}{% endif %}</option>
+                {% endfor %}
+            </select>
             <button>Поиск</button>
         </form>
         {% if search_time or performance %}

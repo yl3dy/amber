@@ -37,17 +37,28 @@ def postprocess_entry(servers, entry):
         'is_file': entry['is_f'],
     }
 
-def postprocess_results(results):
-    servers = get_servers()
+def postprocess_results(servers, results):
     return [postprocess_entry(servers, entry) for entry in results]
     
 
 def mainpage(request):
     search_string = result = search_time = performance = None
+    servers = get_servers()
     if request.method == 'GET' and 'q' in request.GET:
         search_string = request.GET.get('q', '')
+        server_request = request.GET.get('server', '')
         t = datetime.now()
-        result = main_collection.find({'wds': {'$all': split_words(search_string.lower())}}).sort('nm').limit(RESULT_NUM)
+        search_dict = {'wds': {'$all': split_words(search_string.lower())}}
+        if server_request: search_dict['srvs.' + server_request] = {'$exists': True}
+        result = main_collection.find(search_dict).sort('nm').limit(RESULT_NUM)
+
         performance = result.explain()
         search_time = datetime.now() - t
-    return render_to_response('main.html', {'search_result': postprocess_results(result), 'search_string': search_string, 'search_time': search_time, 'performance': performance})
+    return render_to_response('main.html', {
+            'search_result': postprocess_results(servers, result),
+            'search_string': search_string,
+            'search_time': search_time,
+            'performance': performance,
+            'servers': servers,
+            'server_request': server_request,
+    })
