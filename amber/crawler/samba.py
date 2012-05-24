@@ -1,8 +1,11 @@
 #!/usr/bin/python2
 from datetime import datetime
 import smbc, logging
+from multiprocessing import Queue, Process
+from time import sleep
 
-MAX_TRIES = 5
+PROCESS_NUMBER = 5
+SLEEP_TIME = 5
 
 # smbc entry types
 SMBC_FILE = 8L
@@ -19,8 +22,8 @@ ENCODE_TABLE = {
     ']': '%5D',
 }
 
-def item_type(entry):
-    return 'file' if entry.smbc_type == SMBC_FILE else 'dir'
+def is_item_file(entry):
+    return entry.smbc_type == SMBC_FILE
 
 def is_service(entry):
     return entry.smbc_type == SMBC_SERVICE
@@ -37,61 +40,83 @@ def percent_encode(string):
 
 
 
-def get_dents(ctx, path):
-    return ctx.opendir(percent_encode(path)).getdents()
-
-def get_metainfo(ctx, path):
+def get_metainfo(path):
     data = ctx.stat(percent_encode(path))
     change_time = datetime.fromtimestamp(data[8])
     size = data[6]
     return change_time, size
 
 
-def process_entry(input_pipe, ctx, root, dent, trying=0):
-    path = None
-    size = 0
-    try:
-        path = root + '/' + dent.name
-        dent_type = item_type(dent)
 
-        sum_size = None
-        if dent_type == 'dir':
-            sum_size = sum([
-                process_entry(input_pipe, ctx, path, entry)
-                for entry in get_dents(ctx, path)
-                if entry.name not in ['..', '.']
-            ])
+def data_process(q_in, q_out):
+    ctx = smbc.Context()
+    while True:
+        is_data = False
+        entry = q_in.get()
 
-        changed_at, size = get_metainfo(ctx, path)
+        path = entry[0]
+        is_file = entry[1]
 
-        # Size of folder is sum of size of all files in it
-        if sum_size <> None: size = sum_size
-        if dent_type == 'dir': path += '/'
+        change_time = size = childs = None
+
+        try:
+            data = ctx.stat(percent_encode(path))
+            change_time = datetime.fromtimestamp(data[8])
+            size = data[6]
+
+            childs = None
+            if not is_file:
+                childs = [
+                    (path + '/' + dent.name, is_item_file(dent))
+                    for dent in ctx.opendir(percent_encode(path)).getdents()
+                    if dent.name not in ['..', '.']
+                ]
+
+            is_data = True
+            q_out.put((path, is_file, change_time, size, childs))
+        except smbc.TimedOutError:
+            print 'Some sleep... at: ' + path
+            sleep(SLEEP_TIME)
+            q_in.put(entry)
+        except Exception:
+            logging.exception('\n\n====================\nException at: ' + path)
+            q_out.put(None)
+        
+
+def get_data(q_in, q_out, entries):
+    res = []
+    for entry in entries: q_in.put(entry)
+    for entry in entries: res.append(q_out.get())
+    return res
+
+
+def process_childs(input_pipe, q_in, q_out, entries):
+
+    sum_size = 0
+
+    for entry in get_data(q_in, q_out, entries):
+        if entry == None: continue
+
+        path, is_file, change_time, size, childs = entry
+
+        if not is_file:
+            size = process_childs(input_pipe, q_in, q_out, childs)
+            path += '/'
+
+        sum_size += size
 
         data = {
             'path': path.decode('utf8'),
             'size': size,
-            'changed_at': changed_at,
-            'is_file': dent_type == 'file',
+            'changed_at': change_time,
+            'is_file': is_file,
         }
 
         if input_pipe: input_pipe.send(data)
-        else: print data
+        else: print data['path']
 
-        return size
+    return sum_size
 
-    except smbc.NoEntryError:
-        logging.error('No entry error: ' + str(path))
-    except smbc.PermissionError:
-        logging.error('Permission error: ' + str(path))
-    except smbc.TimedOutError:
-        logging.error('Timed out error: ' + str(path))
-    except Exception as err:
-        logging.exception('Unknown exception: ' + str(path))
-
-    if trying < MAX_TRIES: size = process_entry(input_pipe, ctx, root, dent, trying+1)
-
-    return size
 
 def scan_host(host, input_pipe=None):
     """ Scanning given host and snd data to return pipe if given """
@@ -103,15 +128,26 @@ def scan_host(host, input_pipe=None):
     entries = []
     try:
         entries = [
-            entry
+            (smb_host + '/' + entry.name, False)
             for entry in ctx.opendir(smb_host).getdents()
             if is_service(entry)
         ]
     except Exception as err:
+        if input_pipe: input_pipe.send(None)
+        else: print 'Finished.'
         logging.exception('Failed to scan host: ' + smb_host)
         return False
 
-    for entry in entries: process_entry(input_pipe, ctx, smb_host, entry)
+    # Queues for interacting with processes
+    q_in = Queue()
+    q_out = Queue()
+    # Creating list of samba processors with own samba context
+    processes = [Process(target=data_process, args=(q_in, q_out)) for i in xrange(PROCESS_NUMBER)]
+    for p in processes: p.start()
+
+    process_childs(input_pipe, q_in, q_out, entries)
+
+    for p in processes: p.terminate()
 
     if input_pipe: input_pipe.send(None)
     else: print 'Finished.'
