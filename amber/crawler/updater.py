@@ -4,19 +4,9 @@ from datetime import datetime
 from pymongo import binary
 import hashlib, os, logging
 
-def get_name(path):
-    return os.path.split(path)[1]
-
-def get_extension(path):
-    split = get_name(path).split('.')
-    if len(split) > 1: return split[-1].lower()
     
 
-def get_unic_id(data):
-    name = get_name(data['_id'])
-    unic_str = name + u':' + str(data['sz']) + ':' + str(data['ch_t'])
-    bin_string = hashlib.md5(unic_str.encode('utf8')).digest()
-    return binary.Binary(bin_string, binary.MD5_SUBTYPE)
+
 
 def update_host(host):
     server = servers_collection.find_one({'host': host})
@@ -59,13 +49,14 @@ def update_host(host):
             # Creating new entry if was updated nothing
             if not resp['updatedExisting']:
                 path = entry['_id']
+                name = get_name(path)
                 entry['srvs'] = {server_id: [path]}
-                entry['wds'] = split_words(get_name(path).lower())
+                entry['wds'] = split_words(name.lower())
                 entry['_id'] = unic_id
                 entry['s_t'] = datetime.now()
-                entry['nm'] = get_name(path)
+                entry['nm'] = name
                 if entry['is_f']:
-                    extension = get_extension(path)
+                    extension = get_extension(name)
                     if extension: entry['ext'] = extension
                 main_collection.save(entry)
 
