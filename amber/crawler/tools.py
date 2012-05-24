@@ -1,34 +1,4 @@
 
-# smbc entry types
-SMBC_FILE = 8L
-SMBC_DIR = 7L
-SMBC_SERVICE = 3L
-
-def item_type(entry):
-    return 'file' if entry.smbc_type == SMBC_FILE else 'dir'
-
-def is_service(entry):
-    return entry.smbc_type == SMBC_SERVICE
-
-
-def percent_encode(string):
-    encode_table = {
-                    '!': '%21',
-                    '&': '%26',
-                    '?': '%3F',
-                    '%': '%25',
-                    '~': '%7E',
-                    '[': '%5B',
-                    ']': '%5D',
-                   }
-    result = ''
-    for i in range(len(string)):
-        if string[i] in encode_table:
-            result += encode_table[string[i]]
-        else:
-            result += string[i]
-    return result
-
 
 
 def get_name(path):

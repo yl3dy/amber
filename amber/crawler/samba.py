@@ -1,9 +1,41 @@
 #!/usr/bin/python2
 from datetime import datetime
 import smbc, logging
-from tools import get_unic_id, is_service, item_type, percent_encode
 
 MAX_TRIES = 5
+
+# smbc entry types
+SMBC_FILE = 8L
+SMBC_DIR = 7L
+SMBC_SERVICE = 3L
+
+ENCODE_TABLE = {
+    '!': '%21',
+    '&': '%26',
+    '?': '%3F',
+    '%': '%25',
+    '~': '%7E',
+    '[': '%5B',
+    ']': '%5D',
+}
+
+def item_type(entry):
+    return 'file' if entry.smbc_type == SMBC_FILE else 'dir'
+
+def is_service(entry):
+    return entry.smbc_type == SMBC_SERVICE
+
+
+def percent_encode(string):
+    result = ''
+    for i in range(len(string)):
+        if string[i] in ENCODE_TABLE:
+            result += ENCODE_TABLE[string[i]]
+        else:
+            result += string[i]
+    return result
+
+
 
 def get_dents(ctx, path):
     return ctx.opendir(percent_encode(path)).getdents()
@@ -14,19 +46,8 @@ def get_metainfo(ctx, path):
     size = data[6]
     return change_time, size
 
-def save_object(path, dent_type, change_time, size):
-    mongo_collection.save({
-        '_id': path.replace(smb_host + '/', ''), # Path without host will be object id
-        'is_f': True if dent_type == 'file' else False, # Is object has hile type
-        'sz': size,
-        'ch_t': change_time,   # Object change time
-        's_t': datetime.now(), # Save time
-        'uid': get_unic_id(path, size, change_time), # Unic identificator
-    })
 
-
-
-def process_entry(ctx, root, dent, trying=0):
+def process_entry(input_pipe, ctx, root, dent, trying=0):
     path = None
     size = 0
     try:
@@ -36,35 +57,44 @@ def process_entry(ctx, root, dent, trying=0):
         sum_size = None
         if dent_type == 'dir':
             sum_size = sum([
-                process_entry(ctx, path, entry)
+                process_entry(input_pipe, ctx, path, entry)
                 for entry in get_dents(ctx, path)
                 if entry.name not in ['..', '.']
             ])
 
         changed_at, size = get_metainfo(ctx, path)
+
         # Size of folder is sum of size of all files in it
         if sum_size <> None: size = sum_size
-        save_object(path, dent_type, changed_at, size)
+        if dent_type == 'dir': path += '/'
+
+        data = {
+            'path': path.decode('utf8'),
+            'size': size,
+            'changed_at': changed_at,
+            'is_file': dent_type == 'file',
+        }
+
+        if input_pipe: input_pipe.send(data)
+        else: print data
 
         return size
 
     except smbc.NoEntryError:
-        logging.error('No entry error: ' + path)
+        logging.error('No entry error: ' + str(path))
     except smbc.PermissionError:
-        logging.error('Permission error: ' + path)
+        logging.error('Permission error: ' + str(path))
     except smbc.TimedOutError:
-        logging.error('Timed out error: ' + path)
+        logging.error('Timed out error: ' + str(path))
     except Exception as err:
-        logging.exception('Unknown exception: ' + path)
+        logging.exception('Unknown exception: ' + str(path))
 
-    if trying < MAX_TRIES: size = process_entry(ctx, root, dent, trying+1)
+    if trying < MAX_TRIES: size = process_entry(input_pipe, ctx, root, dent, trying+1)
 
     return size
 
-def scan_host(host, mongo_collection):
-    """ Scanning given host and save results in given mongo collection """
-
-    mongo_collection.drop()
+def scan_host(host, input_pipe=None):
+    """ Scanning given host and snd data to return pipe if given """
 
     smb_host = 'smb://' + host
     ctx = smbc.Context()
@@ -79,6 +109,11 @@ def scan_host(host, mongo_collection):
         ]
     except Exception as err:
         logging.exception('Failed to scan host: ' + smb_host)
-        return 'fail'
+        return False
 
-    for entry in entries: process_entry(ctx, smb_host, entry)
+    for entry in entries: process_entry(input_pipe, ctx, smb_host, entry)
+
+    if input_pipe: input_pipe.send(None)
+    else: print 'Finished.'
+
+    return True
