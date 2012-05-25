@@ -30,8 +30,8 @@ def get_paths(servers, paths):
         for path in paths[server_id]:
             res.append((
                 server['is_active'],
-                os.path.join(server['host'], path),
-                os.path.join(server['name'], path) if 'name' in server else os.path.join(server['host'], path),
+                server['host'] + path,
+                server['name'] + path if 'name' in server else server['host'] + path,
             ))
     return res
 
@@ -42,10 +42,10 @@ def get_servers():
 
 def postprocess_entry(servers, entry):
     return {
-        'name': entry['nm'],
-        'size': sizeof_fmt(entry['sz']),
-        'paths': get_paths(servers, entry['srvs']),
-        'is_file': entry['is_f'],
+        'name': entry['n'],
+        'size': sizeof_fmt(entry['s']),
+        'paths': get_paths(servers, entry['p']),
+        'is_file': entry['f'],
     }
 
 def postprocess_results(servers, results):
@@ -54,8 +54,8 @@ def postprocess_results(servers, results):
 def get_entry_type_query(entry_type):
     if entry_type not in ENTRY_TYPES: return {}
     entry_filter = ENTRY_TYPES[entry_type]
-    if 'is_file' in entry_filter: return {'is_f': entry_filter['is_file']}
-    elif 'extensions' in entry_filter: return {'ext': {'$in': entry_filter['extensions']}}
+    if 'is_file' in entry_filter: return {'f': entry_filter['is_file']}
+    elif 'extensions' in entry_filter: return {'e': {'$in': entry_filter['extensions']}}
     return {}
 
 def mainpage(request):
@@ -79,8 +79,8 @@ def mainpage(request):
         t = datetime.now()
 
         # Basic search through name, type and server
-        search_dict = {'wds': {'$all': split_words(search_string.lower())}}
-        if server_request: search_dict['srvs.' + server_request] = {'$exists': True}
+        search_dict = {'w': {'$all': split_words(search_string)}}
+        if server_request: search_dict['p.' + server_request] = {'$exists': True}
         if entry_type: search_dict.update(get_entry_type_query(entry_type))
         result = main_collection.find(search_dict)
 
@@ -92,19 +92,19 @@ def mainpage(request):
         }
         if 'sort_name' in request.GET:
             val = int(request.GET['sort_name'])
-            result = result.sort('nm', val)
+            result = result.sort('n', val)
             sort['name'] = val
         elif 'sort_size' in request.GET:
             val = int(request.GET['sort_size'])
-            result = result.sort('sz', val)
+            result = result.sort('s', val)
             sort['size'] = val
         elif 'sort_change' in request.GET:
             val = int(request.GET['sort_change'])
-            result = result.sort('ch_t', val)
+            result = result.sort('c', val)
             sort['change'] = val
         else:
             val = 1
-            result = result.sort('nm', val)
+            result = result.sort('n', val)
             sort['name'] = val
 
         response_dict['sort'] = sort
