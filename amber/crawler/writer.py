@@ -1,5 +1,5 @@
 import hashlib, os, logging
-from pymongo import binary
+from bson import binary
 
 def get_name(path):
     return os.path.split(path)[1]
