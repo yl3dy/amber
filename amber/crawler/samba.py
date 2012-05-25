@@ -4,7 +4,7 @@ import smbc, logging
 from multiprocessing import Queue, Process
 from time import sleep
 
-PROCESS_NUMBER = 5
+PROCESS_NUMBER = 3
 SLEEP_TIME = 5
 
 # smbc entry types
@@ -54,6 +54,8 @@ def data_process(q_in, q_out):
         is_data = False
         entry = q_in.get()
 
+        if entry == None: break
+
         path = entry[0]
         is_file = entry[1]
 
@@ -78,6 +80,9 @@ def data_process(q_in, q_out):
             print 'Some sleep... at: ' + path
             sleep(SLEEP_TIME)
             q_in.put(entry)
+        except smbc.PermissionError:
+            logging.info('Permission error at: ' + path)
+            q_out.put(None)
         except Exception:
             logging.exception('\n\n====================\nException at: ' + path)
             q_out.put(None)
@@ -90,7 +95,7 @@ def get_data(q_in, q_out, entries):
     return res
 
 
-def process_childs(input_pipe, q_in, q_out, entries):
+def process_childs(input_pipe, q_in, q_out, entries, host):
 
     sum_size = 0
 
@@ -100,15 +105,14 @@ def process_childs(input_pipe, q_in, q_out, entries):
         path, is_file, change_time, size, childs = entry
 
         if not is_file:
-            size = process_childs(input_pipe, q_in, q_out, childs)
-            path += '/'
+            size = process_childs(input_pipe, q_in, q_out, childs, host)
 
         sum_size += size
 
         data = {
-            'path': path.decode('utf8'),
+            'path': path.decode('utf8').replace(host, ''),
             'size': size,
-            'changed_at': change_time,
+            'change_time': change_time,
             'is_file': is_file,
         }
 
@@ -145,9 +149,11 @@ def scan_host(host, input_pipe=None):
     processes = [Process(target=data_process, args=(q_in, q_out)) for i in xrange(PROCESS_NUMBER)]
     for p in processes: p.start()
 
-    process_childs(input_pipe, q_in, q_out, entries)
+    process_childs(input_pipe, q_in, q_out, entries, smb_host)
 
-    for p in processes: p.terminate()
+    # Sending messages to stop processes
+    for p in processes: q_in.put(None)
+    for p in processes: p.join()
 
     if input_pipe: input_pipe.send(None)
     else: print 'Finished.'
