@@ -23,14 +23,18 @@ def sizeof_fmt(num):
         num /= 1024.0
     return "%3.1f%s" % (num, 'TB')
 
-def get_paths(servers, paths):
+def get_paths(servers, paths, is_orthodox):
     res = []
+    if is_orthodox:
+        form_url = lambda host, path: 'smb://' + host + path
+    else:
+        form_url = lambda host, path: 'file:////' + host + path
     for server_id in paths:
         server = servers[server_id]
         for path in paths[server_id]:
             res.append((
                 server['is_active'],
-                server['host'] + path,
+                form_url(server['host'], path),
                 server['name'] + path if 'name' in server else server['host'] + path,
             ))
     return res
@@ -40,16 +44,16 @@ def get_servers():
     for server in servers_collection.find(): res[str(server['_id'])] = server
     return res
 
-def postprocess_entry(servers, entry):
+def postprocess_entry(servers, entry, is_orthodox):
     return {
         'name': entry['n'],
         'size': sizeof_fmt(entry['s']),
-        'paths': get_paths(servers, entry['p']),
+        'paths': get_paths(servers, entry['p'], is_orthodox),
         'is_file': entry['f'],
     }
 
-def postprocess_results(servers, results):
-    return [postprocess_entry(servers, entry) for entry in results]
+def postprocess_results(servers, results, is_orthodox):
+    return [postprocess_entry(servers, entry, is_orthodox) for entry in results]
 
 def get_entry_type_query(entry_type):
     if entry_type not in ENTRY_TYPES: return {}
@@ -66,6 +70,10 @@ def mainpage(request):
     }
 
     if request.method == 'GET' and 'q' in request.GET and request.GET['q']:
+        if 'windows' in request.META['HTTP_USER_AGENT'].lower():
+            is_orthodox = False
+        else:
+            is_orthodox = True
         search_string = request.GET['q']
         server_request = request.GET.get('server', '')
         entry_type = request.GET.get('entry_type', '')
@@ -115,7 +123,7 @@ def mainpage(request):
         # Looking into performance help if debugging
         #if settings.DEBUG: response_dict['performance'] = result.explain() 
 
-        response_dict['search_result'] = postprocess_results(servers, result)
+        response_dict['search_result'] = postprocess_results(servers, result, is_orthodox)
         response_dict['search_time'] = datetime.now() - t
 
     return render_to_response('main.html', response_dict)
