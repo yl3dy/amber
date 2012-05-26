@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Django settings for amber project.
 import os
 
@@ -144,3 +145,9 @@ INSTALLED_APPS = (
 #        },
 #    }
 #}
+
+# Импортируем локальные настройки если они есть
+try:
+    from local_settings import *
+except ImportError:
+    pass
