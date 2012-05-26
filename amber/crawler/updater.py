@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from multiprocessing import Process, Pipe
-from ..mongo_db import mdb, servers_collection
+from ..mongo_db import mdb
 from samba import scan_host
 from writer import writer
 from datetime import datetime
 from postprocessor import postprocessing
+from servers import get_server_id, update_server_info
 import logging
 
 logging.basicConfig(level = logging.INFO)
@@ -14,13 +15,7 @@ def update_host(host):
 
     logging.info('Started scanning host ' + host)
 
-    server = servers_collection.find_one({'host': host})
-    #TODO Сделать выставление коротких айдишников
-    if server == None:
-        server_id = str(servers_collection.save({'host': host}))
-        server = servers_collection.find_one({'host': host})
-    else:
-        server_id = str(server['_id'])
+    server_id = get_server_id(host)
 
     logging.info('Starting scanner and writer')
 
@@ -50,11 +45,11 @@ def update_host(host):
     tmp_collection.drop()
 
 
-    logging.debug('Updating server info')
     # Обновляем информацию по серверу
-    server['scan_start'] = scan_start
-    server['is_active'] = is_scan_ok
-    server['scan_end'] = datetime.now()
-    servers_collection.save(server)
+    update_server_info(server_id, {
+        'scan_start': scan_start,
+        'is_active': is_scan_ok,
+        'scan_end': datetime.now(),
+    })
 
     logging.info('Finished')
