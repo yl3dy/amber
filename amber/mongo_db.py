@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-from django.conf import settings
+import settings
 import pymongo
 
 mdb = pymongo.Connection(settings.MONGO_DB['connection'])[settings.MONGO_DB['database_name']]

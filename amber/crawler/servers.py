@@ -27,7 +27,14 @@ def get_server_id(host):
     if server == None:
         server_id = get_new_id()
         logging.info('Creating new server with host %s and id %s' % (host, server_id))
-        servers_collection.save({'_id': server_id, 'name': host, 'host': host})
+        servers_collection.save({
+            '_id': server_id,
+            'name': host,
+            'host': host,
+            'is_active': False,
+            'scan_start': None,
+            'scan_end': None,
+        })
     else:
         server_id = server['_id']
     return server_id

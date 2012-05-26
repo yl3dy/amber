@@ -47,8 +47,8 @@ def update_host(host):
 
     # Обновляем информацию по серверу
     update_server_info(server_id, {
-        'scan_start': scan_start,
         'is_active': is_scan_ok,
+        'scan_start': scan_start,
         'scan_end': datetime.now(),
     })
 
