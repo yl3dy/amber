@@ -83,6 +83,9 @@ def data_process(q_in, q_out):
         except smbc.PermissionError:
             logging.info('Permission error at: ' + path)
             q_out.put(None)
+        except smbc.NoEntryError:
+            logging.info('No entry error at: ' + path)
+            q_out.put(None)
         except Exception:
             logging.exception('\n\n====================\nException at: ' + path)
             q_out.put(None)

@@ -1,8 +1,6 @@
 from ..mongo_db import main_collection, split_words
-from samba import scan_host
 from datetime import datetime
-from pymongo import binary
-import hashlib, os, logging
+import logging
 
 
 def get_extension(name):
