@@ -32,11 +32,11 @@ def get_paths(servers, paths, is_orthodox):
     for server_id in paths:
         server = servers[server_id]
         for path in paths[server_id]:
-            res.append((
-                server['is_active'],
-                form_url(server['host'], path),
-                server['name'] + path if 'name' in server else server['host'] + path,
-            ))
+            res.append({
+                'is_active': server['is_active'],
+                'url': form_url(server['host'], path),
+                'title': server['name'] + path if 'name' in server else server['host'] + path,
+            })
     return res
 
 def get_servers():

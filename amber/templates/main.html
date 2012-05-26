@@ -45,7 +45,7 @@
                     <p class="{% if entry.is_file %}file{% else %}dir{% endif %}">{{ entry.name }} ({{ entry.size }})</p>
                     <ul>
                         {% for path in entry.paths %}
-                            <li class="{% if path.0 %}active{% else %}inactive{% endif %}"><a href="{{ path.1 }}">//{{ path.2 }}</a></li>
+                            <li class="{% if path.is_active %}active{% else %}inactive{% endif %}"><a href="{{ path.url }}">//{{ path.title }}</a></li>
                         {% endfor %}                            
                     </ul>
                 </li>
