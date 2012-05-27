@@ -3,6 +3,7 @@ from datetime import datetime
 import smbc, logging
 from multiprocessing import Queue, Process
 from time import sleep
+import os.path
 
 PROCESS_NUMBER = 3
 SLEEP_TIME = 5
@@ -125,7 +126,7 @@ def process_childs(input_pipe, q_in, q_out, entries, host):
     return sum_size
 
 
-def scan_host(host, input_pipe=None):
+def scan_host(host, index_path, input_pipe=None):
     """ Scanning given host and snd data to return pipe if given """
 
     smb_host = 'smb://' + host
@@ -134,11 +135,20 @@ def scan_host(host, input_pipe=None):
 
     entries = []
     try:
-        entries = [
-            (smb_host + '/' + entry.name, False)
-            for entry in ctx.opendir(smb_host).getdents()
-            if is_service(entry)
-        ]
+        if not index_path:
+            entries = [
+                (smb_host + '/' + entry.name, False)
+                for entry in ctx.opendir(smb_host).getdents()
+                if is_service(entry)
+            ]
+        else:
+            entries = [ (os.path.join(smb_host, index_path), False), ]
+            #smb_root = os.path.join(smb_host, index_path)
+            #entries = [
+            #    (smb_root + '/' + entry.name, False)
+            #    for entry in ctx.opendir(smb_root).getdents()
+            #    if entry.name not in ['.', '..'] and not is_item_file(entry)
+            #]
     except Exception as err:
         if input_pipe: input_pipe.send(None)
         else: print 'Finished.'

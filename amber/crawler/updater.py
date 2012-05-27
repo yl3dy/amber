@@ -10,7 +10,7 @@ import logging
 
 logging.basicConfig(level = logging.INFO)
 
-def update_host(host):
+def update_host(host, index_path=None):
     scan_start = datetime.now()
 
     logging.info('Started scanning host ' + host)
@@ -30,11 +30,10 @@ def update_host(host):
     writer_proc = Process(target=writer, args=(output_pipe, tmp_collection))
     writer_proc.start()
 
-    is_scan_ok = scan_host(host, input_pipe)
+    is_scan_ok = scan_host(host, index_path, input_pipe)
 
     writer_proc.join()
 
-    
 
     # Запускаем обработку полученных данных и их слитие в основную коллекцию
     if is_scan_ok:
