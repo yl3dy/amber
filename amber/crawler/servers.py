@@ -21,9 +21,17 @@ def get_new_id():
 
 
 
-def get_server_id(host):
+def get_server_id(host, auto_names=False, name=None):
     logging.info('Getting server id')
     server = servers_collection.find_one({'host': host})
+
+    # prepare server name
+    if auto_names:
+        server_name = host.split('.')[0]
+    else:
+        if name: server_name = name
+        else: server_name = host
+
     if server == None:
         server_id = get_new_id()
         logging.info('Creating new server with host %s and id %s' % (host, server_id))
@@ -37,6 +45,8 @@ def get_server_id(host):
         })
     else:
         server_id = server['_id']
+
+    update_server_info(server_id, {'name': server_name})
     return server_id
 
 def update_server_info(server_id, data):

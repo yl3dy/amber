@@ -39,9 +39,13 @@ def get_paths(servers, paths, is_orthodox):
             })
     return res
 
-def get_servers():
+def get_servers(active_only=False):
     res = {}
-    for server in servers_collection.find(): res[str(server['_id'])] = server
+    if active_only:
+        search_res = servers_collection.find({'is_active': True})
+    else:
+        search_res = servers_collection.find()
+    for server in search_res: res[str(server['_id'])] = server
     return res
 
 def postprocess_entry(servers, entry, is_orthodox):
@@ -63,7 +67,7 @@ def get_entry_type_query(entry_type):
     return {}
 
 def mainpage(request):
-    servers = get_servers()
+    servers = get_servers(active_only=True)
     response_dict = {
         'servers': servers,
         'entry_types': ENTRY_TYPES,
@@ -92,6 +96,7 @@ def mainpage(request):
         if entry_type: search_dict.update(get_entry_type_query(entry_type))
         result = main_collection.find(search_dict)
 
+        result = result.limit(RESULT_NUM)
         # Choosing how to sort
         sort = {
             'name': None,
@@ -118,7 +123,7 @@ def mainpage(request):
         response_dict['sort'] = sort
 
         # Setting output limit
-        result = result.limit(RESULT_NUM)
+        #result = result.limit(RESULT_NUM)
 
         # Looking into performance help if debugging
         #if settings.DEBUG: response_dict['performance'] = result.explain() 

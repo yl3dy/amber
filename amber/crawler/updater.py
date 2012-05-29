@@ -10,12 +10,12 @@ import logging
 
 logging.basicConfig(level = logging.INFO)
 
-def update_host(host, index_path=None):
+def update_host(host, index_path=None, auto_name=False, name=None):
     scan_start = datetime.now()
 
     logging.info('Started scanning host ' + host)
 
-    server_id = get_server_id(host)
+    server_id = get_server_id(host, auto_name, name)
 
     logging.info('Starting scanner and writer')
 
