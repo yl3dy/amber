@@ -26,15 +26,16 @@ def sizeof_fmt(num):
 def get_paths(servers, paths, is_orthodox):
     res = []
     if is_orthodox:
-        form_url = lambda host, path: 'smb://' + host + path
+        url_prefix = 'smb://'
     else:
-        form_url = lambda host, path: 'file:////' + host + path
+        url_prefix = 'file:////'
     for server_id in paths:
         server = servers[server_id]
         for path in paths[server_id]:
             res.append({
                 'is_active': server['is_active'],
-                'url': form_url(server['host'], path),
+                'url': server['host'] + path,
+                'urlprefix': url_prefix,
                 'title': server['name'] + path if 'name' in server else server['host'] + path,
             })
     return res
