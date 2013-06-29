@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Django settings for amber project.
+'''Django settings for amber project'''
 import os
 
 DEBUG = True
@@ -99,9 +99,6 @@ MIDDLEWARE_CLASSES = (
 ROOT_URLCONF = 'amber.urls'
 
 TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
     os.path.join(os.path.dirname(__file__), 'templates'),
 )
 
@@ -147,7 +144,28 @@ INSTALLED_APPS = (
 #    }
 #}
 
+
+RESULT_NUM = 100
+
+ENTRY_TYPES = {
+    'folders': {'title': 'Папки', 'is_file': False},
+    'files': {'title': 'Файлы', 'is_file': True},
+    'video': {'title': 'Видео', 'extensions': ['mp4', 'avi', '3gp', 'rmvb', \
+        'wmv', 'mkv', 'mpg', 'mov', 'vob', 'flv', 'swf', 'ogm']},
+    'music': {'title': 'Музыка', 'extensions': ['mp3', 'wma', 'flac', 'aac', \
+        'mmf', 'amr', 'm4a', 'm4r', 'ogg', 'mp2', 'wav']},
+    'pictures': {'title': 'Изображения', 'extensions': ['jpg', 'jpeg', 'png', \
+        'ico', 'bmp', 'gif', 'tif', 'tiff', 'pcx', 'tga', 'nef']},
+    'books': {'title': 'Книги', 'extensions': ['djvu', 'pdf', 'epub', 'fb2', \
+        'html', 'htm', 'txt', 'ps', 'doc', 'rtf']},
+}
+
+WORD_DELIMITERS = (' ', '.', '-', '_', ',', '[', ']', '(', ')', '?', '!', '<', \
+    '>', '{', '}', '"', "'")
+
+
 # Импортируем локальные настройки если они есть
+# pylint: disable-msg=F0401
 try:
     from local_settings import *
 except ImportError:

@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
+'''Updating server data'''
 from multiprocessing import Process, Pipe
-from ..mongo_db import mdb
-from samba import scan_host
-from writer import writer
+from ..mongo_db import MDB
+from .samba import scan_host
+from .writer import writer
+from .postprocessor import postprocessing
+from .servers import get_server_id, update_server_info
 from datetime import datetime
-from postprocessor import postprocessing
-from servers import get_server_id, update_server_info
 import logging
 
 logging.basicConfig(level = logging.INFO)
 
 def update_host(host, index_path=None, auto_name=False, name=None):
+    '''Updates given host'''
     scan_start = datetime.now()
 
     logging.info('Started scanning host ' + host)
@@ -23,7 +25,7 @@ def update_host(host, index_path=None, auto_name=False, name=None):
     output_pipe, input_pipe = Pipe(False)
 
     # Коллекция для временного хранения результатов
-    tmp_collection = mdb['tmp.' + server_id]
+    tmp_collection = MDB['tmp.' + server_id]
     tmp_collection.drop()
 
     # Запускаем сканер и записыватель

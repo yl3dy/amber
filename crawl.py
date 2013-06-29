@@ -1,5 +1,5 @@
 #!/usr/bin/python2
-
+'''Script for starting crawler'''
 import sys
 from amber.crawler import updater
 

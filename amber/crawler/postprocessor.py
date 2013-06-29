@@ -1,17 +1,21 @@
-from ..mongo_db import main_collection, split_words
+'''Postprocessing of scanned results'''
+from ..mongo_db import MAIN_COLLECTION, split_words
 from datetime import datetime
 import logging
 
 
 def get_extension(name):
+    '''Returns extension by given file name'''
     split = name.split('.')
-    if len(split) > 1: return split[-1].lower()
+    if len(split) > 1:
+        return split[-1].lower()
 
 
 def postprocessing(server_id, collection, scan_start):
-
-    logging.info('Started postprocessing. Total entries: %d' % collection.find().count())
-    logging.info('In the main collection: %d' % main_collection.find().count())
+    '''Postprocessing results in given collection for given server'''
+    count = collection.find().count()
+    logging.info('Started postprocessing. Total entries: %d', count)
+    logging.info('In the main collection: %d', MAIN_COLLECTION.find().count())
     for entry in collection.find():
         data = {
             '_id': entry['_id'],
@@ -21,18 +25,28 @@ def postprocessing(server_id, collection, scan_start):
             'f': entry['is_file'],
             'c': entry['change_time'],
         }
-        if entry['is_file']: data['e'] = get_extension(entry['name'])
+        if entry['is_file']:
+            data['e'] = get_extension(entry['name'])
 
         paths = entry['paths']
         paths.sort()
 
-        update_data = {'$set': {'p.' + server_id: paths, 't.' + server_id: datetime.now()}}
+        update_data = {'$set': {
+            'p.' + server_id: paths,
+            't.' + server_id: datetime.now()
+        }}
 
-        main_collection.update(data, update_data, upsert=True)
+        MAIN_COLLECTION.update(data, update_data, upsert=True)
 
-    logging.info('Finished processing entries. Total objects in the main collection: %d' % main_collection.find().count())
+    count = MAIN_COLLECTION.find().count()
+    logging.info('Finished processing. Total in the main: %d', count)
 
-    main_collection.update({'t.' + server_id: {'$lt': scan_start}}, {'$unset': {'p.' + server_id: 1, 't.' + server_id: 1}}, multi=True)
-    main_collection.remove({'p': {}})
+    MAIN_COLLECTION.update(
+        {'t.' + server_id: {'$lt': scan_start}},
+        {'$unset': {'p.' + server_id: 1, 't.' + server_id: 1}},
+        multi=True
+    )
+    MAIN_COLLECTION.remove({'p': {}})
 
-    logging.info('Finished postprocessing. Total objects in the main collection: %d' % main_collection.find().count())
+    count = MAIN_COLLECTION.find().count()
+    logging.info('Finished postprocessing. Total in the main: %d', count)

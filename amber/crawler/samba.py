@@ -1,4 +1,5 @@
-#!/usr/bin/python2
+# -*- coding: utf-8 -*-
+'''Scanning samba shares'''
 from datetime import datetime
 import smbc, logging
 from multiprocessing import Queue, Process
@@ -23,14 +24,9 @@ ENCODE_TABLE = {
     ']': '%5D',
 }
 
-def is_item_file(entry):
-    return entry.smbc_type == SMBC_FILE
-
-def is_service(entry):
-    return entry.smbc_type == SMBC_SERVICE
-
 
 def percent_encode(string):
+    '''Percent encoding of given string'''
     result = ''
     for i in range(len(string)):
         if string[i] in ENCODE_TABLE:
@@ -39,23 +35,14 @@ def percent_encode(string):
             result += string[i]
     return result
 
-
-
-def get_metainfo(path):
-    data = ctx.stat(percent_encode(path))
-    change_time = datetime.fromtimestamp(data[8])
-    size = data[6]
-    return change_time, size
-
-
-
 def data_process(q_in, q_out):
+    '''Scanning process, which using pipes for getting and returning data'''
     ctx = smbc.Context()
     while True:
-        is_data = False
         entry = q_in.get()
 
-        if entry == None: break
+        if entry == None:
+            break
 
         path = entry[0]
         is_file = entry[1]
@@ -70,12 +57,10 @@ def data_process(q_in, q_out):
             childs = None
             if not is_file:
                 childs = [
-                    (path + '/' + dent.name, is_item_file(dent))
+                    (path + '/' + dent.name, dent.smbc_type == SMBC_FILE)
                     for dent in ctx.opendir(percent_encode(path)).getdents()
                     if dent.name not in ['..', '.']
                 ]
-
-            is_data = True
             q_out.put((path, is_file, change_time, size, childs))
         except smbc.TimedOutError:
             print 'Some sleep... at: ' + path
@@ -93,19 +78,21 @@ def data_process(q_in, q_out):
         
 
 def get_data(q_in, q_out, entries):
+    '''Getting data'''
     res = []
-    for entry in entries: q_in.put(entry)
-    for entry in entries: res.append(q_out.get())
+    for entry in entries:
+        q_in.put(entry)
+    for entry in entries:
+        res.append(q_out.get())
     return res
 
 
 def process_childs(input_pipe, q_in, q_out, entries, host):
-
+    '''Processing childs'''
     sum_size = 0
-
     for entry in get_data(q_in, q_out, entries):
-        if entry == None: continue
-
+        if entry == None:
+            continue
         path, is_file, change_time, size, childs = entry
 
         if not is_file:
@@ -120,14 +107,16 @@ def process_childs(input_pipe, q_in, q_out, entries, host):
             'is_file': is_file,
         }
 
-        if input_pipe: input_pipe.send(data)
-        else: print data['path']
+        if input_pipe:
+            input_pipe.send(data)
+        else:
+            print data['path']
 
     return sum_size
 
 
 def scan_host(host, index_path, input_pipe=None):
-    """ Scanning given host and snd data to return pipe if given """
+    '''Scanning given host and snd data to return pipe if given'''
 
     smb_host = 'smb://' + host
     ctx = smbc.Context()
@@ -139,36 +128,43 @@ def scan_host(host, index_path, input_pipe=None):
             entries = [
                 (smb_host + '/' + entry.name, False)
                 for entry in ctx.opendir(smb_host).getdents()
-                if is_service(entry)
+                if entry.smbc_type == SMBC_SERVICE
             ]
         else:
             entries = [ (os.path.join(smb_host, index_path), False), ]
-            #smb_root = os.path.join(smb_host, index_path)
-            #entries = [
-            #    (smb_root + '/' + entry.name, False)
-            #    for entry in ctx.opendir(smb_root).getdents()
-            #    if entry.name not in ['.', '..'] and not is_item_file(entry)
-            #]
-    except Exception as err:
-        if input_pipe: input_pipe.send(None)
-        else: print 'Finished.'
+    # TODO Specify exceptions
+    except Exception:
+        if input_pipe:
+            input_pipe.send(None)
+        else:
+            print 'Finished.'
         logging.exception('Failed to scan host: ' + smb_host)
         return False
-
+ 
     # Queues for interacting with processes
     q_in = Queue()
     q_out = Queue()
     # Creating list of samba processors with own samba context
-    processes = [Process(target=data_process, args=(q_in, q_out)) for i in xrange(PROCESS_NUMBER)]
-    for p in processes: p.start()
+    processes = [
+        Process(target=data_process, args=(q_in, q_out))
+        for _ in xrange(PROCESS_NUMBER)
+    ]
+    for process in processes:
+        process.start()
 
     process_childs(input_pipe, q_in, q_out, entries, smb_host)
 
     # Sending messages to stop processes
-    for p in processes: q_in.put(None)
-    for p in processes: p.join()
+    for process in processes:
+        q_in.put(None)
+    for process in processes:
+        process.join()
 
-    if input_pipe: input_pipe.send(None)
-    else: print 'Finished.'
+    if input_pipe:
+        input_pipe.send(None)
+    else:
+        print 'Finished.'
+
+    logging.info('Finished scanning server')
 
     return True
